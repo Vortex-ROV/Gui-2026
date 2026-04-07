@@ -25,8 +25,8 @@ class MainWindow(QMainWindow, WindowControls):
         self._inject_layouts()
 
         # ── Controller overlays ───────────────────────────────────────────────
-        self._setup_controller_overlay()
-        self._setup_lateral_overlay()
+        # self._setup_controller_overlay()
+        # self._setup_latyyeral_overlay()
 
         # ── Joystick ──────────────────────────────────────────────────────────
         self.joystick = Joystick()
