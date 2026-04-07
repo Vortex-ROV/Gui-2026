@@ -67,7 +67,7 @@ class CameraMenuPopup(QWidget):
                     background-color: rgba(201, 169, 97, 50);
                 }
             """)
-            btn.clicked.connect(lambda checked, i=index: self._select(i))
+            btn.clicked.connect(lambda checked=False, i=index: self._select(i))
             inner.addWidget(btn)
 
         # Remove border from last button
@@ -83,8 +83,16 @@ class CameraMenuPopup(QWidget):
         self.setFixedHeight(len(self.CAMERA_PAGES) * 38 + 8)
 
     def _select(self, index):
-        self.on_select(index)
-        self.close()
+        print(f"_select called with index={index}")
+        try:
+            print("calling on_select...")
+            self.on_select(index)
+            print("on_select done, calling close...")
+            self.close()
+            print("close done")
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
 
     def show_under(self, button: QPushButton):
         """Position and show the menu directly below the given button"""
