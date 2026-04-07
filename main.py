@@ -8,8 +8,8 @@ from ui import Ui_MainWindow
 from uiControls.window_controls import WindowControls
 from camerasStreaming.streaming_receiver import ZEDStreamThread
 from camerasStreaming.ip_streaming import IPCameraStreamThread
-from ControllerMapping.ControllerButtons import ControllerOverlayLabel
-from ControllerMapping.LateralButtons import LateralOverlayLabel
+# from ControllerMapping.ControllerButtons import ControllerOverlayLabel
+# from ControllerMapping.LateralButtons import LateralOverlayLabel
 from Control.joystick_class import Joystick
 # from Control.motor_sliders import MotorSliders
 
@@ -161,63 +161,63 @@ class MainWindow(QMainWindow, WindowControls):
 
     # ── Controller overlays ───────────────────────────────────────────────────
 
-    def _setup_lateral_overlay(self):
-        old_label = self.ui.controllerlateral
-        parent    = old_label.parent()
-        geometry  = old_label.geometry()
-        pixmap    = old_label.pixmap()
+    # def _setup_lateral_overlay(self):
+    #     old_label = self.ui.controllerlateral
+    #     parent    = old_label.parent()
+    #     geometry  = old_label.geometry()
+    #     pixmap    = old_label.pixmap()
 
-        callbacks = {
-            "RB": lambda: print("RB clicked"),
-            "LB": lambda: print("LB clicked"),
-            "LT": lambda: print("LT clicked"),
-            "RT": lambda: print("RT clicked"),
-        }
-        self.lateral_overlay = LateralOverlayLabel(parent=parent, callbacks=callbacks)
-        self.lateral_overlay.setGeometry(geometry)
-        self.lateral_overlay.setPixmap(pixmap)
-        self.lateral_overlay.setScaledContents(old_label.hasScaledContents())
-        self.lateral_overlay.setAlignment(old_label.alignment())
-        self.lateral_overlay.show()
-        old_label.hide()
+    #     callbacks = {
+    #         "RB": lambda: print("RB clicked"),
+    #         "LB": lambda: print("LB clicked"),
+    #         "LT": lambda: print("LT clicked"),
+    #         "RT": lambda: print("RT clicked"),
+    #     }
+    #     self.lateral_overlay = LateralOverlayLabel(parent=parent, callbacks=callbacks)
+    #     self.lateral_overlay.setGeometry(geometry)
+    #     self.lateral_overlay.setPixmap(pixmap)
+    #     self.lateral_overlay.setScaledContents(old_label.hasScaledContents())
+    #     self.lateral_overlay.setAlignment(old_label.alignment())
+    #     self.lateral_overlay.show()
+    #     old_label.hide()
 
-    def _setup_controller_overlay(self):
-        old_label = self.ui.controllernormal
-        parent    = old_label.parent()
-        geometry  = old_label.geometry()
-        pixmap    = old_label.pixmap()
+    # def _setup_controller_overlay(self):
+    #     old_label = self.ui.controllernormal
+    #     parent    = old_label.parent()
+    #     geometry  = old_label.geometry()
+    #     pixmap    = old_label.pixmap()
 
-        callbacks = {
-            "A":          lambda: print("A clicked"),
-            "B":          lambda: print("B clicked"),
-            "X":          lambda: print("X clicked"),
-            "Y":          lambda: print("Y clicked"),
-            "Start":      lambda: print("Start clicked"),
-            "Back":       lambda: print("Back clicked"),
-            "DPad":       lambda: print("DPad clicked"),
-            "DPad_Up":    lambda: print("DPad Up clicked"),
-            "DPad_Down":  lambda: print("DPad Down clicked"),
-            "DPad_Right": lambda: print("DPad Right clicked"),
-            "DPad_Left":  lambda: print("DPad Left clicked"),
-            "LS":         lambda: print("Left Stick clicked (LS3)"),
-            "LS_Up":      lambda: print("Left Stick Up"),
-            "LS_Down":    lambda: print("Left Stick Down"),
-            "LS_Left":    lambda: print("Left Stick Left"),
-            "LS_Right":   lambda: print("Left Stick Right"),
-            "RS":         lambda: print("Right Stick clicked (RS3)"),
-            "RS_Up":      lambda: print("Right Stick Up"),
-            "RS_Down":    lambda: print("Right Stick Down"),
-            "RS_Left":    lambda: print("Right Stick Left"),
-            "RS_Right":   lambda: print("Right Stick Right"),
-        }
+    #     callbacks = {
+    #         "A":          lambda: print("A clicked"),
+    #         "B":          lambda: print("B clicked"),
+    #         "X":          lambda: print("X clicked"),
+    #         "Y":          lambda: print("Y clicked"),
+    #         "Start":      lambda: print("Start clicked"),
+    #         "Back":       lambda: print("Back clicked"),
+    #         "DPad":       lambda: print("DPad clicked"),
+    #         "DPad_Up":    lambda: print("DPad Up clicked"),
+    #         "DPad_Down":  lambda: print("DPad Down clicked"),
+    #         "DPad_Right": lambda: print("DPad Right clicked"),
+    #         "DPad_Left":  lambda: print("DPad Left clicked"),
+    #         "LS":         lambda: print("Left Stick clicked (LS3)"),
+    #         "LS_Up":      lambda: print("Left Stick Up"),
+    #         "LS_Down":    lambda: print("Left Stick Down"),
+    #         "LS_Left":    lambda: print("Left Stick Left"),
+    #         "LS_Right":   lambda: print("Left Stick Right"),
+    #         "RS":         lambda: print("Right Stick clicked (RS3)"),
+    #         "RS_Up":      lambda: print("Right Stick Up"),
+    #         "RS_Down":    lambda: print("Right Stick Down"),
+    #         "RS_Left":    lambda: print("Right Stick Left"),
+    #         "RS_Right":   lambda: print("Right Stick Right"),
+    #     }
 
-        self.controller_overlay = ControllerOverlayLabel(parent=parent, callbacks=callbacks)
-        self.controller_overlay.setGeometry(geometry)
-        self.controller_overlay.setPixmap(pixmap)
-        self.controller_overlay.setScaledContents(old_label.hasScaledContents())
-        self.controller_overlay.setAlignment(old_label.alignment())
-        self.controller_overlay.show()
-        old_label.hide()
+    #     self.controller_overlay = ControllerOverlayLabel(parent=parent, callbacks=callbacks)
+    #     self.controller_overlay.setGeometry(geometry)
+    #     self.controller_overlay.setPixmap(pixmap)
+    #     self.controller_overlay.setScaledContents(old_label.hasScaledContents())
+    #     self.controller_overlay.setAlignment(old_label.alignment())
+    #     self.controller_overlay.show()
+    #     old_label.hide()
 
     # ── Misc ──────────────────────────────────────────────────────────────────
 
