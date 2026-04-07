@@ -123,7 +123,7 @@ class WindowControls:
 
         # Screen transition - welcome → control
         if hasattr(ui, 'startButton'):
-            ui.startButton.clicked.connect(lambda: self.fade_slide_transition(ui))
+            ui.startButton.clicked.connect(lambda checked: self.fade_slide_transition(ui))
 
         # Navigation buttons
         if hasattr(ui, 'Menubutton'):
@@ -140,7 +140,7 @@ class WindowControls:
         # ── Camera menu ───────────────────────────────────────────────────────
         if hasattr(ui, 'camerasbutton'):
             self._camera_menu = None
-            ui.camerasbutton.clicked.connect(self._toggle_camera_menu)
+            ui.camerasbutton.clicked.connect(lambda checked: self._toggle_camera_menu())
 
         self.dragging = False
         self.offset = QPoint()
