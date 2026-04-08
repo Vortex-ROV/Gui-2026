@@ -1,9 +1,9 @@
 import pygame
 import platform
 from PySide6.QtCore import QThread
-from Control.gui_mappings import *
-from Control.pcb_class import PCB
-from Control.pixhawk_class import Pixhawk
+from gui_mappings import *
+from pcb_class import PCB
+from pixhawk_class import Pixhawk
 
 class Joystick(QThread):
 
@@ -23,7 +23,7 @@ class Joystick(QThread):
         self.__controller_last_buttons_data = [] # this is to keep track of what button got pressed and what button got released
         self.__controller_raw_axes_data = []
         self.__controller_mapped_axes_data = []
-        self.__controller_hat_data = [0, 0] 
+        self.__controller_hat_data = [0, 0]
         self.__controller_last_hats_data = 0 # this is to keep track of what button in the hat got pressed and what button got released
         self.__controller_connected = False
         self.__controller_name = ""
@@ -66,14 +66,14 @@ class Joystick(QThread):
 
         self.__button_action_mapping = {
             JoystickButtons.A.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_A],
-            JoystickButtons.B.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_B],
-            JoystickButtons.X.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_C],
-            JoystickButtons.Y.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_D],
-            JoystickButtons.LT.value: self.__rov_actions[GUIControllerButtonActions.ARM_DISARM],
-            JoystickButtons.RT.value: self.__rov_actions[GUIControllerButtonActions.ROTATE_TOOL],
+            JoystickButtons.B.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_C],
+            JoystickButtons.X.value: self.__rov_actions[GUIControllerButtonActions.ROTATE_TOOL],
+            JoystickButtons.Y.value: self.__rov_actions[GUIControllerButtonActions.ARM_DISARM],
+            JoystickButtons.LT.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_B],
+            JoystickButtons.RT.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_D],
             JoystickButtons.BACK.value: self.__rov_actions[GUIControllerButtonActions.STABILIZE_MODE],
-            JoystickButtons.START.value: self.__rov_actions[GUIControllerButtonActions.NONE],
-            JoystickButtons.XBOX.value: self.__rov_actions[GUIControllerButtonActions.MANUAL_MODE],
+            JoystickButtons.START.value: self.__rov_actions[GUIControllerButtonActions.MANUAL_MODE],
+            JoystickButtons.XBOX.value: self.__rov_actions[GUIControllerButtonActions.NONE],
             JoystickButtons.LSTCIK.value: self.__rov_actions[GUIControllerButtonActions.NONE], 
             JoystickButtons.RSTCIK.value: self.__rov_actions[GUIControllerButtonActions.FLIP_ROV],
             JoystickHats.HATUP: self.__rov_actions[GUIControllerButtonActions.SERVO_UP],
@@ -100,8 +100,7 @@ class Joystick(QThread):
             JoystickAxes.LEFTVERTICAL.value: self.__rov_movements[GUIControllerMovementActions.FORWARD],
             JoystickAxes.LEFTHORIZONTAL.value: self.__rov_movements[GUIControllerMovementActions.LATERAL],
             JoystickAxes.RIGHTVERTICAL.value: self.__rov_movements[GUIControllerMovementActions.THROTTLE],
-            JoystickAxes.RIGHTHORIZONTAL.value: self.__rov_movements[GUIControllerMovementActions.LATERAL],
-            JoystickAxes.TRIGGERS.value: self.__rov_movements[GUIControllerMovementActions.YAW]
+            JoystickAxes.RIGHTHORIZONTAL.value: self.__rov_movements[GUIControllerMovementActions.YAW]
         }
 
         print("initialized class")
@@ -154,7 +153,7 @@ class Joystick(QThread):
                 self.__controller_last_hats_data = [0, 0]
                 self.__controller_mapped_axes_data = [0, 0, 0, 0, 0]
                 print(self.__controller_name)
-                
+    
 
             while self.__controller_connected:
                 pygame.event.pump()
@@ -253,7 +252,7 @@ class Joystick(QThread):
                     self.__controller_mapped_axes_data[4] += int(-400*self.__controller_raw_axes_data[4] + 400*self.__controller_raw_axes_data[5])
                 
                 # set the movements values in the pixhawk and move the ROV according to these values, then reset the value for a fresh read
-                for i in range(5):
+                for i in range(4):
                     if self.__axis_action_mapping[i] == "": pass
                     else: self.__axis_event(self.__axis_action_mapping[i], self.__controller_mapped_axes_data[i])
                 
@@ -271,7 +270,10 @@ class Joystick(QThread):
             
                 pygame.time.Clock().tick(200)
         
-    def __press_event(self, method): method()
+    def __press_event(self, method): 
+        method()
+        self.pcb.send_state()
+        # print("hello")
     def __release_event(self, method): method()
 
     def __axis_event(self, method, args): method(args)
