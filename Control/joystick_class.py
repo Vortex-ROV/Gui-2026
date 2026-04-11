@@ -66,11 +66,11 @@ class Joystick(QThread):
 
         self.__button_action_mapping = {
             JoystickButtons.A.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_A],
-            JoystickButtons.B.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_C],
-            JoystickButtons.X.value: self.__rov_actions[GUIControllerButtonActions.ROTATE_TOOL],
-            JoystickButtons.Y.value: self.__rov_actions[GUIControllerButtonActions.ARM_DISARM],
-            JoystickButtons.LT.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_B],
-            JoystickButtons.RT.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_D],
+            JoystickButtons.B.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_D],
+            JoystickButtons.X.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_B],
+            JoystickButtons.Y.value: self.__rov_actions[GUIControllerButtonActions.GRIPPER_C],
+            JoystickButtons.LT.value: self.__rov_actions[GUIControllerButtonActions.ROTATE_TOOL],
+            JoystickButtons.RT.value: self.__rov_actions[GUIControllerButtonActions.ARM_DISARM],
             JoystickButtons.BACK.value: self.__rov_actions[GUIControllerButtonActions.STABILIZE_MODE],
             JoystickButtons.START.value: self.__rov_actions[GUIControllerButtonActions.MANUAL_MODE],
             JoystickButtons.XBOX.value: self.__rov_actions[GUIControllerButtonActions.NONE],

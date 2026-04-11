@@ -61,7 +61,7 @@ class PCB(QThread):
 
     def control_rotating_tool(self):
         self.__rotate_tool = not self.__rotate_tool
-        if self.__arduino_control["bilge"] == 0: self.__arduino_control["bilge"] = 40  
+        if self.__arduino_control["bilge"] == 0: self.__arduino_control["bilge"] = 70
         else: self.__arduino_control["bilge"] = 0
         print("Rotating Tool:", "rotating" if self.__rotate_tool else "not rotating")
     

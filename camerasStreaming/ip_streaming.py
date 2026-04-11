@@ -14,8 +14,8 @@ PORT     = 554
 CHANNEL  = "101"
 
 CAMERA_IPS = {
-    "forward":  "192.168.33.66",
-    "grippers": "192.168.33.69",
+    "forward":  "192.168.33.63",
+    "grippers": "192.168.33.65",
     "downward": "192.168.33.68",
 }
 
