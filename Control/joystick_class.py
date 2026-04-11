@@ -1,9 +1,9 @@
 import pygame
 import platform
 from PySide6.QtCore import QThread
-from gui_mappings import *
-from pcb_class import PCB
-from pixhawk_class import Pixhawk
+from Control.gui_mappings import *
+from Control.pcb_class import PCB
+from Control.pixhawk_class import Pixhawk
 
 class Joystick(QThread):
 

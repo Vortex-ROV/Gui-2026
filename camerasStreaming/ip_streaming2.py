@@ -13,9 +13,9 @@ PORT     = 554
 CHANNEL  = "101"
 
 CAMERA_IPS = {
-    "forward":  "192.168.33.66",
-    "grippers": "192.168.33.69",
-    "downward": "192.168.33.64",
+    "forward":  "192.168.33.63",
+    "grippers": "192.168.33.65",
+    "downward": "192.168.33.68",
 }
 
 
@@ -109,9 +109,9 @@ class IPCameraStreamThread(QThread):
 
     Signals
     -------
-    forward_frame_ready  : QPixmap  – forward  camera (192.168.33.66)
-    grippers_frame_ready : QPixmap  – grippers camera (192.168.33.69)
-    downward_frame_ready : QPixmap  – downward camera (192.168.33.64)
+    forward_frame_ready  : QPixmap  – forward  camera (192.168.33.63)
+    grippers_frame_ready : QPixmap  – grippers camera (192.168.33.65)
+    downward_frame_ready : QPixmap  – downward camera (192.168.33.68)
     error_occurred       : str      – human-readable error message
     """
 
