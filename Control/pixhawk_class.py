@@ -52,7 +52,7 @@ class Pixhawk(QThread):
         self.__throttle_value += int(value * (self.__gain/100))
 
     def set_yaw_value(self, value):
-        self.__yaw_value += int(value * -1 * (self.__gain/100))
+        self.__yaw_value += int(value  * (self.__gain/100))
 
     def set_forward_value(self, value):
         self.__forward_value += int(value * self.__rov_flip_value * (self.__gain/100))
