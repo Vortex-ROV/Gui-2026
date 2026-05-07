@@ -52,7 +52,7 @@ class Pixhawk(QThread):
         self.__throttle_value += int(value * (self.__gain/100))
 
     def set_yaw_value(self, value):
-        self.__yaw_value += int(-1*value * self.__rov_flip_value * (self.__gain/100))
+        self.__yaw_value += int(value  * (self.__gain/100))
 
     def set_forward_value(self, value):
         self.__forward_value += int(value * self.__rov_flip_value * (self.__gain/100))
@@ -168,7 +168,7 @@ class Pixhawk(QThread):
             #     self.__lateral_value = 1500
             self.__check_and_correct_movement_values()
             rc_channel_values = [1500, 1500,self.__throttle_value, self.__yaw_value, self.__forward_value, self.__lateral_value, 65535, 65535, 65535]
-            print(rc_channel_values[2:6])
+            # print(rc_channel_values[2:6])
             self.__pixhawk.mav.rc_channels_override_send(
                 self.__pixhawk.target_system,
                 self.__pixhawk.target_component,

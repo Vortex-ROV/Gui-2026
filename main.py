@@ -1,17 +1,40 @@
+import os
 import sys
+import traceback
+import ctypes
+
+
+# ── GStreamer environment setup for PyInstaller EXE ──────────────────────────
+if getattr(sys, 'frozen', False):
+    # Running as EXE — point GStreamer to the bundled plugins
+    base = sys._MEIPASS
+    gst_plugin_path = os.path.join(base, 'gstreamer-1.0')
+    os.environ['GST_PLUGIN_PATH'] = gst_plugin_path
+    os.environ['GST_PLUGIN_SYSTEM_PATH'] = gst_plugin_path
+    os.environ['PATH'] = base + os.pathsep + os.environ.get('PATH', '')
+
+# ── Windows taskbar icon fix ──────────────────────────────────────────────────
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Titans.ROV.Control.2026")
+# ─────────────────────────────────────────────────────────────────────────────
+
+import traceback
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QSizePolicy, QHBoxLayout, QVBoxLayout
 )
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QIcon
 from ui import Ui_MainWindow
 from uiControls.window_controls import WindowControls
 from camerasStreaming.streaming_receiver import ZEDStreamThread
 from camerasStreaming.ip_streaming import IPCameraStreamThread
-from ControllerMapping.ControllerButtons import ControllerOverlayLabel
-from ControllerMapping.LateralButtons import LateralOverlayLabel
+# from ControllerMapping.ControllerButtons import ControllerOverlayLabel
+# from ControllerMapping.LateralButtons import LateralOverlayLabel
 from Control.joystick_class import Joystick
 # from Control.motor_sliders import MotorSliders
+from Control.gui_mappings import GUIControllerButtonActions
+from voice.voice_announcer import VoiceAnnouncer
+from uiControls.camera_scroller import CameraScroller
+from uiControls.gui_updater import GUIUpdater
 
 
 class MainWindow(QMainWindow, WindowControls):
@@ -19,18 +42,80 @@ class MainWindow(QMainWindow, WindowControls):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowIcon(QIcon(":/Icons/iCONS/titnaslogo.png"))  # ← add this
         self.setup_window_controls(self.ui)
+        
 
+         # ── Voice announcer ───────────────────────────────────────────────────
+        self.voice = VoiceAnnouncer()
+        self.voice.welcome()   # spoken as soon as the window opens
+ 
+        # ── Camera scroller ───────────────────────────────────────────────────
+        self.scroller = CameraScroller(self.ui.middlewidget)
+    
         # ── Fix layouts BEFORE anything else ─────────────────────────────────
         self._inject_layouts()
 
+        # ── Camera scroller ───────────────────────────────────────────────────
+        self.scroller = CameraScroller(self.ui.middlewidget)
+
         # ── Controller overlays ───────────────────────────────────────────────
-        self._setup_controller_overlay()
-        self._setup_lateral_overlay()
+        # self._setup_controller_overlay()
+        # self._setup_lateral_overlay()
 
         # ── Joystick ──────────────────────────────────────────────────────────
         self.joystick = Joystick()
+
+        # Wire SCROLL_CAMERA_FORWARD (17) → scroll forward through camera pages
+        # START  button → scroll camera pages forward  (was doing nothing)
+        # LSTICK button → scroll camera pages backward (was doing nothing)
+        # remap_action finds the None placeholder in __button_action_mapping
+        # and replaces it with the real function
+        # self.joystick.remap_action(
+        #     GUIControllerButtonActions.SCROLL_CAMERA_FORWARD,
+        #     self.scroller.scroll_forward
+        # )
+        # self.joystick.remap_action(
+        #     GUIControllerButtonActions.SCROLL_CAMERA_BACKWARD,
+        #     self.scroller.scroll_backward
+        # )
+ 
+        # RSTICK button → FLIP_ROV already runs control_flip_rov,
+        # wrap_action keeps that AND also flips the camera page
+        # self.joystick.wrap_action(
+        #     GUIControllerButtonActions.FLIP_ROV,
+        #     self.scroller.flip_zed_rear
+        # )
+ 
+        # HATRIGHT/HATLEFT → gain increase/decrease already runs,
+        # wrap_action keeps that AND speaks the new gain value after
+        self.joystick.wrap_action(
+            GUIControllerButtonActions.GAIN_INCREASE,
+            lambda: self.voice.say_gain(self.joystick.pixhawk.get_gain())
+        )
+        self.joystick.wrap_action(
+            GUIControllerButtonActions.GAIN_DECREASE,
+            lambda: self.voice.say_gain(self.joystick.pixhawk.get_gain())
+        )
+
+        # XBOX button (was NONE) → scroll forward through all camera pages
+        self.joystick.set_button_mapping(
+            "XBOX",
+            self.scroller.scroll_forward
+        )
+
+        # LSTICK button (was NONE) → scroll backward through all camera pages
+        self.joystick.set_button_mapping(
+            "LSTICK",
+            self.scroller.scroll_backward
+        )
+ 
         self.joystick.start()
+
+        self.gui_updater = GUIUpdater(self.ui, self.joystick)
+
+
+
 
         # self.motor_sliders = MotorSliders(self.ui, self.joystick.pixhawk)
 
@@ -39,11 +124,13 @@ class MainWindow(QMainWindow, WindowControls):
 
         # ZED mode page (firstcamerasmodewidget)
         self.zed_thread.left_frame_ready.connect(self.ui.zedleftlabel.setPixmap)
-        self.zed_thread.right_frame_ready.connect(self.ui.zedrightlabel.setPixmap)
+        # self.zed_thread.right_frame_ready.connect(self.ui.zedrightlabel.setPixmap)
 
         # ZED + Down page (zedanddown)
         self.zed_thread.left_frame_ready.connect(self.ui.leftzed.setPixmap)
-        self.zed_thread.right_frame_ready.connect(self.ui.rightzed.setPixmap)
+        # self.zed_thread.right_frame_ready.connect(self.ui.rightzed.setPixmap)
+        # self.ui.zedrightlabel.hide()
+        # self.ui.rightzed.hide()
 
         self.zed_thread.error_occurred.connect(lambda msg: print(msg))
         self.zed_thread.start()
@@ -63,6 +150,7 @@ class MainWindow(QMainWindow, WindowControls):
         # # Grippers camera → left rear
         self.ip_thread.grippers_frame_ready.connect(self.ui.leftrear.setPixmap)
         self.ip_thread.grippers_frame_ready.connect(self.ui.leftrearcamera.setPixmap)
+        # self.ui.left
         
 
         self.ip_thread.error_occurred.connect(lambda msg: print(msg))
@@ -122,8 +210,8 @@ class MainWindow(QMainWindow, WindowControls):
         # Top row: leftzed + rightzed
         self.ui.leftzed.setSizePolicy(expand)
         self.ui.leftzed.setScaledContents(True)
-        self.ui.rightzed.setSizePolicy(expand)
-        self.ui.rightzed.setScaledContents(True)
+        # self.ui.rightzed.setSizePolicy(expand)
+        # self.ui.rightzed.setScaledContents(True)
 
         # Bottom row: downcameralabel_2 — inject layout into downcamera_3 frame
         if self.ui.downcamera_3.layout() is None:
@@ -161,63 +249,63 @@ class MainWindow(QMainWindow, WindowControls):
 
     # ── Controller overlays ───────────────────────────────────────────────────
 
-    def _setup_lateral_overlay(self):
-        old_label = self.ui.controllerlateral
-        parent    = old_label.parent()
-        geometry  = old_label.geometry()
-        pixmap    = old_label.pixmap()
+    # def _setup_lateral_overlay(self):
+    #     old_label = self.ui.controllerlateral
+    #     parent    = old_label.parent()
+    #     geometry  = old_label.geometry()
+    #     pixmap    = old_label.pixmap()
 
-        callbacks = {
-            "RB": lambda: print("RB clicked"),
-            "LB": lambda: print("LB clicked"),
-            "LT": lambda: print("LT clicked"),
-            "RT": lambda: print("RT clicked"),
-        }
-        self.lateral_overlay = LateralOverlayLabel(parent=parent, callbacks=callbacks)
-        self.lateral_overlay.setGeometry(geometry)
-        self.lateral_overlay.setPixmap(pixmap)
-        self.lateral_overlay.setScaledContents(old_label.hasScaledContents())
-        self.lateral_overlay.setAlignment(old_label.alignment())
-        self.lateral_overlay.show()
-        old_label.hide()
+    #     callbacks = {
+    #         "RB": lambda: print("RB clicked"),
+    #         "LB": lambda: print("LB clicked"),
+    #         "LT": lambda: print("LT clicked"),
+    #         "RT": lambda: print("RT clicked"),
+    #     }
+    #     self.lateral_overlay = LateralOverlayLabel(parent=parent, callbacks=callbacks)
+    #     self.lateral_overlay.setGeometry(geometry)
+    #     self.lateral_overlay.setPixmap(pixmap)
+    #     self.lateral_overlay.setScaledContents(old_label.hasScaledContents())
+    #     self.lateral_overlay.setAlignment(old_label.alignment())
+    #     self.lateral_overlay.show()
+    #     old_label.hide()
 
-    def _setup_controller_overlay(self):
-        old_label = self.ui.controllernormal
-        parent    = old_label.parent()
-        geometry  = old_label.geometry()
-        pixmap    = old_label.pixmap()
+    # def _setup_controller_overlay(self):
+    #     old_label = self.ui.controllernormal
+    #     parent    = old_label.parent()
+    #     geometry  = old_label.geometry()
+    #     pixmap    = old_label.pixmap()
 
-        callbacks = {
-            "A":          lambda: print("A clicked"),
-            "B":          lambda: print("B clicked"),
-            "X":          lambda: print("X clicked"),
-            "Y":          lambda: print("Y clicked"),
-            "Start":      lambda: print("Start clicked"),
-            "Back":       lambda: print("Back clicked"),
-            "DPad":       lambda: print("DPad clicked"),
-            "DPad_Up":    lambda: print("DPad Up clicked"),
-            "DPad_Down":  lambda: print("DPad Down clicked"),
-            "DPad_Right": lambda: print("DPad Right clicked"),
-            "DPad_Left":  lambda: print("DPad Left clicked"),
-            "LS":         lambda: print("Left Stick clicked (LS3)"),
-            "LS_Up":      lambda: print("Left Stick Up"),
-            "LS_Down":    lambda: print("Left Stick Down"),
-            "LS_Left":    lambda: print("Left Stick Left"),
-            "LS_Right":   lambda: print("Left Stick Right"),
-            "RS":         lambda: print("Right Stick clicked (RS3)"),
-            "RS_Up":      lambda: print("Right Stick Up"),
-            "RS_Down":    lambda: print("Right Stick Down"),
-            "RS_Left":    lambda: print("Right Stick Left"),
-            "RS_Right":   lambda: print("Right Stick Right"),
-        }
+    #     callbacks = {
+    #         "A":          lambda: print("A clicked"),
+    #         "B":          lambda: print("B clicked"),
+    #         "X":          lambda: print("X clicked"),
+    #         "Y":          lambda: print("Y clicked"),
+    #         "Start":      lambda: print("Start clicked"),
+    #         "Back":       lambda: print("Back clicked"),
+    #         "DPad":       lambda: print("DPad clicked"),
+    #         "DPad_Up":    lambda: print("DPad Up clicked"),
+    #         "DPad_Down":  lambda: print("DPad Down clicked"),
+    #         "DPad_Right": lambda: print("DPad Right clicked"),
+    #         "DPad_Left":  lambda: print("DPad Left clicked"),
+    #         "LS":         lambda: print("Left Stick clicked (LS3)"),
+    #         "LS_Up":      lambda: print("Left Stick Up"),
+    #         "LS_Down":    lambda: print("Left Stick Down"),
+    #         "LS_Left":    lambda: print("Left Stick Left"),
+    #         "LS_Right":   lambda: print("Left Stick Right"),
+    #         "RS":         lambda: print("Right Stick clicked (RS3)"),
+    #         "RS_Up":      lambda: print("Right Stick Up"),
+    #         "RS_Down":    lambda: print("Right Stick Down"),
+    #         "RS_Left":    lambda: print("Right Stick Left"),
+    #         "RS_Right":   lambda: print("Right Stick Right"),
+    #     }
 
-        self.controller_overlay = ControllerOverlayLabel(parent=parent, callbacks=callbacks)
-        self.controller_overlay.setGeometry(geometry)
-        self.controller_overlay.setPixmap(pixmap)
-        self.controller_overlay.setScaledContents(old_label.hasScaledContents())
-        self.controller_overlay.setAlignment(old_label.alignment())
-        self.controller_overlay.show()
-        old_label.hide()
+    #     self.controller_overlay = ControllerOverlayLabel(parent=parent, callbacks=callbacks)
+    #     self.controller_overlay.setGeometry(geometry)
+    #     self.controller_overlay.setPixmap(pixmap)
+    #     self.controller_overlay.setScaledContents(old_label.hasScaledContents())
+    #     self.controller_overlay.setAlignment(old_label.alignment())
+    #     self.controller_overlay.show()
+    #     old_label.hide()
 
     # ── Misc ──────────────────────────────────────────────────────────────────
 
@@ -239,6 +327,11 @@ class MainWindow(QMainWindow, WindowControls):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    old_hook = sys.excepthook
+    def exception_hook(exctype, value, tb):
+        traceback.print_exception(exctype, value, tb)
+        old_hook(exctype, value, tb)
+    sys.excepthook = exception_hook
     window = MainWindow()
     window.show()
     sys.exit(app.exec())

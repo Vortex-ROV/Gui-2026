@@ -16,6 +16,7 @@ class PCB(QThread):
         self.__jetson_ip = "192.168.33.1"
         self.__jetson_port = 12345
         self.connected = False
+        self.control_string = ""
 
         self.__arduino_control = {"Mosfet1": 0, 
                                   "Mosfet2": 0, 
@@ -28,31 +29,38 @@ class PCB(QThread):
                                   "angle": 1500, 
                                   "servo_direction": 0 }
         # print(json.dumps(self.__arduino_control))
-    
+    def get_gripper_states(self):
+        return {
+            "a": bool(self.__arduino_control["Mosfet3"]),
+            "b": bool(self.__arduino_control["Mosfet2"]),
+            "c": bool(self.__arduino_control["Mosfet6"]),
+            "d": bool(self.__arduino_control["Mosfet7"]),
+        }
+
     def control_gripper_a(self):
         self.__gripper_a = not self.__gripper_a
-        self.__arduino_control["Mosfet3"] = not self.__arduino_control["Mosfet3"]
+        # self.__arduino_control["Mosfet3"] = not self.__arduino_control["Mosfet3"]
         if self.__gripper_a: self.__arduino_control["Mosfet3"] = 1
         elif self.__gripper_a == 0: self.__arduino_control["Mosfet3"] = 0
         print("Gripper A:", self.__gripper_a)
 
     def control_gripper_b(self):
         self.__gripper_b = not self.__gripper_b
-        self.__arduino_control["Mosfet2"] = not self.__arduino_control["Mosfet2"]
+        # self.__arduino_control["Mosfet2"] = not self.__arduino_control["Mosfet2"]
         if self.__gripper_b: self.__arduino_control["Mosfet2"] = 1
         elif self.__gripper_b == 0: self.__arduino_control["Mosfet2"] = 0
         print("Gripper B:", self.__gripper_b)
 
     def control_gripper_c(self):
         self.__gripper_c = not self.__gripper_c
-        self.__arduino_control["Mosfet6"] = not self.__arduino_control["Mosfet6"]
+        # self.__arduino_control["Mosfet6"] = not self.__arduino_control["Mosfet6"]
         if self.__gripper_c: self.__arduino_control["Mosfet6"] = 1
         elif self.__gripper_c == 0: self.__arduino_control["Mosfet6"] = 0
         print("Gripper C:", self.__gripper_c)
 
     def control_gripper_d(self):
         self.__gripper_d = not self.__gripper_d
-        self.__arduino_control["Mosfet7"] = not self.__arduino_control["Mosfet7"]
+        # self.__arduino_control["Mosfet7"] = not self.__arduino_control["Mosfet7"]
         if self.__gripper_d: self.__arduino_control["Mosfet7"] = 1
         elif self.__gripper_d == 0: self.__arduino_control["Mosfet7"] = 0
         
@@ -60,7 +68,7 @@ class PCB(QThread):
 
     def control_rotating_tool(self):
         self.__rotate_tool = not self.__rotate_tool
-        if self.__arduino_control["bilge"] == 0: self.__arduino_control["bilge"] = 40  
+        if self.__arduino_control["bilge"] == 0: self.__arduino_control["bilge"] = 70
         else: self.__arduino_control["bilge"] = 0
         print("Rotating Tool:", "rotating" if self.__rotate_tool else "not rotating")
     
@@ -75,6 +83,12 @@ class PCB(QThread):
     def control_camera_stop(self):
         self.__arduino_control["servo_direction"] = 0
 
+    def send_state(self):
+        self.msleep(100)
+        self.__socket.sendall((self.control_string + '\n').encode())
+        print(f"sent: {self.control_string}")
+
+
     def run(self):
         while True:
             try:
@@ -83,10 +97,10 @@ class PCB(QThread):
                 self.connected = True
                 print("Connected to Jetson")
                 while self.connected:
-                    control_string = json.dumps(self.__arduino_control)
+                    self.control_string = json.dumps(self.__arduino_control)
                     # print(control_string)
-                    control_string += '\n'
-                    self.__socket.sendall(control_string.encode())
+                    # control_string += '\n'
+                    # self.__socket.sendall(control_string.encode())
                     self.msleep(100)
                 break
             except (ConnectionRefusedError, ConnectionResetError, OSError) as e:

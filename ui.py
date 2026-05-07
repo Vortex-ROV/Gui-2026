@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'pilot guiYmyOPC.ui'
+## Form generated from reading UI file 'pilot guifbHWPA.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.8.2
 ##
@@ -356,15 +356,6 @@ class Ui_MainWindow(object):
         self.horizontalLayout_7.setSpacing(5)
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
         self.horizontalLayout_7.setContentsMargins(0, 0, 0, 0)
-        self.zedrightlabel = QLabel(self.zedmode)
-        self.zedrightlabel.setObjectName(u"zedrightlabel")
-        self.zedrightlabel.setMinimumSize(QSize(0, 0))
-        self.zedrightlabel.setMaximumSize(QSize(1920, 870))
-        self.zedrightlabel.setScaledContents(True)
-        self.zedrightlabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.horizontalLayout_7.addWidget(self.zedrightlabel)
-
         self.zedleftlabel = QLabel(self.zedmode)
         self.zedleftlabel.setObjectName(u"zedleftlabel")
         self.zedleftlabel.setScaledContents(True)
@@ -541,13 +532,6 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_11.addWidget(self.leftzed)
 
-        self.rightzed = QLabel(self.zedvariants)
-        self.rightzed.setObjectName(u"rightzed")
-        self.rightzed.setScaledContents(True)
-        self.rightzed.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.horizontalLayout_11.addWidget(self.rightzed)
-
 
         self.verticalLayout_5.addWidget(self.zedvariants)
 
@@ -610,7 +594,7 @@ class Ui_MainWindow(object):
         self.backward = QLabel(self.bottomBar)
         self.backward.setObjectName(u"backward")
         self.backward.setGeometry(QRect(90, 87, 41, 55))
-        self.backward.setPixmap(QPixmap(u"iCONS/down.png"))
+        self.backward.setPixmap(QPixmap(u":/Icons/iCONS/down.png"))
         self.backward.setScaledContents(True)
         self.backward.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.right = QLabel(self.bottomBar)
@@ -836,6 +820,10 @@ class Ui_MainWindow(object):
         font4.setPointSize(40)
         font4.setBold(True)
         self.timerlabel.setFont(font4)
+        self.timerlabel.setStyleSheet(u"QLabel {\n"
+"color: rgb(255, 255, 255);\n"
+"}\n"
+"")
         self.timerlabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.startButton_2 = QPushButton(self.bottomBar)
         self.startButton_2.setObjectName(u"startButton_2")
@@ -2990,7 +2978,6 @@ class Ui_MainWindow(object):
         self.Minimizebutton.setText("")
         self.MaximizeButton.setText("")
         self.Exitbutton.setText("")
-        self.zedrightlabel.setText("")
         self.zedleftlabel.setText("")
         self.rightrear.setText("")
         self.leftrear.setText("")
@@ -2999,7 +2986,6 @@ class Ui_MainWindow(object):
         self.rightrearcamera.setText("")
         self.downcamera_2.setText("")
         self.leftzed.setText("")
-        self.rightzed.setText("")
         self.downcameralabel_2.setText("")
         self.forward.setText("")
         self.backward.setText("")
