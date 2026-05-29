@@ -1,5 +1,7 @@
+from logger import log
 import os
 import sys
+# ── GStreamer environment fix for PyInstaller ──────────────────────────────
 import traceback
 import ctypes
 
