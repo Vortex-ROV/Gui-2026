@@ -11,6 +11,7 @@ class CameraMenuPopup(QWidget):
         ("⬇️  Down Camera",          2),
         ("🔀  Rear + Down",          3),
         ("🔭  ZED + Down",           4),
+        ("📹  3 IP Cameras",         5),   # ← add this
     ]
 
     def __init__(self, parent, on_select):

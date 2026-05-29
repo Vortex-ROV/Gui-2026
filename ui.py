@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'pilot guifbHWPA.ui'
+## Form generated from reading UI file 'pilot guiWMuatC.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.8.2
 ##
@@ -422,7 +422,7 @@ class Ui_MainWindow(object):
         self.downcameraframe.setFrameShadow(QFrame.Shadow.Raised)
         self.downcameralabel = QLabel(self.downcameraframe)
         self.downcameralabel.setObjectName(u"downcameralabel")
-        self.downcameralabel.setGeometry(QRect(5, 0, 1911, 870))
+        self.downcameralabel.setGeometry(QRect(525, 0, 870, 870))
         self.downcameralabel.setScaledContents(True)
         self.downcameralabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.middlewidget.addWidget(self.downcamera)
@@ -547,6 +547,65 @@ class Ui_MainWindow(object):
         self.verticalLayout_5.addWidget(self.downcamera_3)
 
         self.middlewidget.addWidget(self.zedanddown)
+        self.threeipcameras = QWidget()
+        self.threeipcameras.setObjectName(u"threeipcameras")
+        self.threeipcamerasframe = QFrame(self.threeipcameras)
+        self.threeipcamerasframe.setObjectName(u"threeipcamerasframe")
+        self.threeipcamerasframe.setGeometry(QRect(0, 0, 1920, 870))
+        self.threeipcamerasframe.setStyleSheet(u"QFrame#threeipcamerasframe {\n"
+"    background: qlineargradient(\n"
+"        x1:0, y1:0, x2:0, y2:1,\n"
+"        stop:0   rgb(5, 18, 50),\n"
+"        stop:0.3 rgb(8, 22, 60),\n"
+"        stop:1   rgb(10, 28, 72)\n"
+"    );\n"
+"    border: 2px solid rgb(201, 169, 97);\n"
+"    border-top: none;\n"
+"    border-bottom: none;\n"
+"    padding: 10px;\n"
+"}")
+        self.threeipcamerasframe.setFrameShape(QFrame.Shape.StyledPanel)
+        self.threeipcamerasframe.setFrameShadow(QFrame.Shadow.Raised)
+        self.verticalLayout_6 = QVBoxLayout(self.threeipcamerasframe)
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.verticalLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.twocamerasframe = QFrame(self.threeipcamerasframe)
+        self.twocamerasframe.setObjectName(u"twocamerasframe")
+        self.twocamerasframe.setFrameShape(QFrame.Shape.StyledPanel)
+        self.twocamerasframe.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_12 = QHBoxLayout(self.twocamerasframe)
+        self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
+        self.horizontalLayout_12.setContentsMargins(0, 0, 0, 0)
+        self.leftone = QLabel(self.twocamerasframe)
+        self.leftone.setObjectName(u"leftone")
+        self.leftone.setScaledContents(True)
+        self.leftone.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.horizontalLayout_12.addWidget(self.leftone)
+
+        self.rightone = QLabel(self.twocamerasframe)
+        self.rightone.setObjectName(u"rightone")
+        self.rightone.setScaledContents(True)
+        self.rightone.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.horizontalLayout_12.addWidget(self.rightone)
+
+
+        self.verticalLayout_6.addWidget(self.twocamerasframe)
+
+        self.thirdcameraframe = QFrame(self.threeipcamerasframe)
+        self.thirdcameraframe.setObjectName(u"thirdcameraframe")
+        self.thirdcameraframe.setFrameShape(QFrame.Shape.StyledPanel)
+        self.thirdcameraframe.setFrameShadow(QFrame.Shadow.Raised)
+        self.downcamera_4 = QLabel(self.thirdcameraframe)
+        self.downcamera_4.setObjectName(u"downcamera_4")
+        self.downcamera_4.setGeometry(QRect(0, 0, 1896, 422))
+        self.downcamera_4.setScaledContents(True)
+        self.downcamera_4.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.verticalLayout_6.addWidget(self.thirdcameraframe)
+
+        self.middlewidget.addWidget(self.threeipcameras)
 
         self.verticalLayout_2.addWidget(self.middlewidget)
 
@@ -2987,6 +3046,9 @@ class Ui_MainWindow(object):
         self.downcamera_2.setText("")
         self.leftzed.setText("")
         self.downcameralabel_2.setText("")
+        self.leftone.setText("")
+        self.rightone.setText("")
+        self.downcamera_4.setText("")
         self.forward.setText("")
         self.backward.setText("")
         self.right.setText("")
