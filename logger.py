@@ -22,7 +22,7 @@ def setup_logger() -> logging.Logger:
                            "logs")
     os.makedirs(log_dir, exist_ok=True)
 
-    log_file = os.path.join(log_dir, f"nautix_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+    log_file = os.path.join(log_dir, f"TITANS_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
 
     # Only add StreamHandler if stdout exists (not None in frozen exe)
     handlers = [logging.FileHandler(log_file, encoding="utf-8")]

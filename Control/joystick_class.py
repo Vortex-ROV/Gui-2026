@@ -5,13 +5,15 @@ from Control.gui_mappings import *
 from Control.pcb_class import PCB
 from Control.pixhawk_class import Pixhawk
 
+
 class Joystick(QThread):
 
     def __init__(self):
         if __name__ != "__main__": super().__init__()
         self.__running = False
+        self.__flipped = False
         self.platform = platform.system()
-        
+
         pygame.init()
         pygame.joystick.init()
 
@@ -22,7 +24,7 @@ class Joystick(QThread):
         self.__controller_raw_axes_data = []
         self.__controller_mapped_axes_data = []
         self.__controller_hat_data = [0, 0]
-        self.__controller_last_hats_data = 0
+        self.__controller_last_hats_data = [0, 0]
         self.__controller_connected = False
         self.__controller_name = ""
         self.__controllers_count = 0
@@ -48,28 +50,29 @@ class Joystick(QThread):
             GUIControllerButtonActions.MANUAL_MODE:     self.pixhawk.control_manual_mode,
             GUIControllerButtonActions.STABILIZE_MODE:  self.pixhawk.control_stabilize_mode,
             GUIControllerButtonActions.DEPTH_HOLD_MODE: self.pixhawk.control_depth_hold_mode,
-            GUIControllerButtonActions.FLIP_ROV:        self.pixhawk.control_flip_rov,
+            GUIControllerButtonActions.FLIP_ROV:        self.flip_controls_90,
             GUIControllerButtonActions.NONE:            "none"
         }
 
         self.__rov_movements = {
-            GUIControllerMovementActions.THROTTLE: self.pixhawk.set_throttle_value,
-            GUIControllerMovementActions.YAW:      self.pixhawk.set_yaw_value,
-            GUIControllerMovementActions.FORWARD:  self.pixhawk.set_forward_value,
-            GUIControllerMovementActions.LATERAL:  self.pixhawk.set_lateral_value,
-            GUIControllerMovementActions.NONE:     ""
+            GUIControllerMovementActions.ROLL:      self.pixhawk.set_roll_value,
+            GUIControllerMovementActions.THROTTLE:  self.pixhawk.set_throttle_value,
+            GUIControllerMovementActions.YAW:       self.pixhawk.set_yaw_value,
+            GUIControllerMovementActions.FORWARD:   self.pixhawk.set_forward_value,
+            GUIControllerMovementActions.LATERAL:   self.pixhawk.set_lateral_value,
+            GUIControllerMovementActions.NONE:      ""
         }
 
         self.__button_action_mapping = {
             JoystickButtons.A.value:      self.__rov_actions[GUIControllerButtonActions.GRIPPER_A],
-            JoystickButtons.B.value:      self.__rov_actions[GUIControllerButtonActions.GRIPPER_D],
-            JoystickButtons.X.value:      self.__rov_actions[GUIControllerButtonActions.GRIPPER_B],
-            JoystickButtons.Y.value:      self.__rov_actions[GUIControllerButtonActions.GRIPPER_C],
-            JoystickButtons.LT.value:     self.__rov_actions[GUIControllerButtonActions.ROTATE_TOOL],
-            JoystickButtons.RT.value:     self.__rov_actions[GUIControllerButtonActions.ARM_DISARM],
+            JoystickButtons.B.value:      self.__rov_actions[GUIControllerButtonActions.GRIPPER_B],
+            JoystickButtons.X.value:      self.__rov_actions[GUIControllerButtonActions.GRIPPER_C],
+            JoystickButtons.Y.value:      self.__rov_actions[GUIControllerButtonActions.GRIPPER_D],
+            JoystickButtons.LT.value:     self.__rov_actions[GUIControllerButtonActions.ARM_DISARM],
+            JoystickButtons.RT.value:     self.__rov_actions[GUIControllerButtonActions.ROTATE_TOOL],
             JoystickButtons.BACK.value:   self.__rov_actions[GUIControllerButtonActions.STABILIZE_MODE],
-            JoystickButtons.START.value:  self.__rov_actions[GUIControllerButtonActions.MANUAL_MODE],
-            JoystickButtons.XBOX.value:   self.__rov_actions[GUIControllerButtonActions.NONE],
+            JoystickButtons.START.value:  self.__rov_actions[GUIControllerButtonActions.NONE],
+            JoystickButtons.XBOX.value:   self.__rov_actions[GUIControllerButtonActions.MANUAL_MODE],
             JoystickButtons.LSTCIK.value: self.__rov_actions[GUIControllerButtonActions.NONE],
             JoystickButtons.RSTCIK.value: self.__rov_actions[GUIControllerButtonActions.FLIP_ROV],
             JoystickHats.HATUP:           self.__rov_actions[GUIControllerButtonActions.SERVO_UP],
@@ -92,7 +95,6 @@ class Joystick(QThread):
             "RSTICK": JoystickButtons.RSTCIK.value
         }
 
-        # PCB-related actions — only these trigger send_state()
         self.__pcb_actions = {
             self.pcb.control_gripper_a,
             self.pcb.control_gripper_b,
@@ -104,17 +106,15 @@ class Joystick(QThread):
             self.pcb.control_camera_stop,
         }
 
-        # Reverse lookup: GUIControllerButtonActions → hat key or button index
-        # Used by wrap_action to find where an action lives in the mapping.
         self.__action_to_key = {
             GUIControllerButtonActions.GRIPPER_A:       JoystickButtons.A.value,
-            GUIControllerButtonActions.GRIPPER_D:       JoystickButtons.B.value,
-            GUIControllerButtonActions.GRIPPER_B:       JoystickButtons.X.value,
-            GUIControllerButtonActions.GRIPPER_C:       JoystickButtons.Y.value,
-            GUIControllerButtonActions.ROTATE_TOOL:     JoystickButtons.LT.value,
-            GUIControllerButtonActions.ARM_DISARM:      JoystickButtons.RT.value,
+            GUIControllerButtonActions.GRIPPER_B:       JoystickButtons.B.value,
+            GUIControllerButtonActions.GRIPPER_C:       JoystickButtons.X.value,
+            GUIControllerButtonActions.GRIPPER_D:       JoystickButtons.Y.value,
+            GUIControllerButtonActions.ARM_DISARM:      JoystickButtons.LT.value,
+            GUIControllerButtonActions.ROTATE_TOOL:     JoystickButtons.RT.value,
             GUIControllerButtonActions.STABILIZE_MODE:  JoystickButtons.BACK.value,
-            GUIControllerButtonActions.MANUAL_MODE:     JoystickButtons.START.value,
+            GUIControllerButtonActions.MANUAL_MODE:     JoystickButtons.XBOX.value,
             GUIControllerButtonActions.FLIP_ROV:        JoystickButtons.RSTCIK.value,
             GUIControllerButtonActions.GAIN_INCREASE:   JoystickHats.HATRIGHT,
             GUIControllerButtonActions.GAIN_DECREASE:   JoystickHats.HATLEFT,
@@ -126,7 +126,8 @@ class Joystick(QThread):
             JoystickAxes.LEFTVERTICAL.value:    self.__rov_movements[GUIControllerMovementActions.FORWARD],
             JoystickAxes.LEFTHORIZONTAL.value:  self.__rov_movements[GUIControllerMovementActions.LATERAL],
             JoystickAxes.RIGHTVERTICAL.value:   self.__rov_movements[GUIControllerMovementActions.THROTTLE],
-            JoystickAxes.RIGHTHORIZONTAL.value: self.__rov_movements[GUIControllerMovementActions.YAW]
+            JoystickAxes.RIGHTHORIZONTAL.value: self.__rov_movements[GUIControllerMovementActions.YAW],
+            JoystickAxes.TRIGGERS.value:        self.__rov_movements[GUIControllerMovementActions.ROLL]
         }
 
         print("initialized class")
@@ -144,17 +145,13 @@ class Joystick(QThread):
         return self.__button_action_mapping[self.__button_name_mapping[button]].__name__
 
     def set_button_mapping(self, button: str, mapping):
-        """Replace the action for a named button with a new callable."""
         if button not in self.__button_name_mapping:
             print("Button not available")
             return
         self.__button_action_mapping[self.__button_name_mapping[button]] = mapping
 
     def wrap_action(self, action: GUIControllerButtonActions, extra_fn):
-        """
-        Keep the existing action for *action* AND also call *extra_fn* after it.
-        Works for both button and hat mappings.
-        """
+        """Keep the existing action for *action* AND also call *extra_fn* after it."""
         key = self.__action_to_key.get(action)
         if key is None:
             print(f"wrap_action: no key found for {action}")
@@ -171,16 +168,29 @@ class Joystick(QThread):
 
         self.__button_action_mapping[key] = _wrapped
 
+    def flip_controls_90(self):
+        self.pixhawk.control_flip_rov()
+        if not self.__flipped:
+            print("flipped")
+            self.__flipped = True
+            self.__axis_action_mapping[JoystickAxes.LEFTVERTICAL.value]   = self.__rov_movements[GUIControllerMovementActions.LATERAL]
+            self.__axis_action_mapping[JoystickAxes.LEFTHORIZONTAL.value] = self.__rov_movements[GUIControllerMovementActions.FORWARD]
+        else:
+            print("normal")
+            self.__flipped = False
+            self.__axis_action_mapping[JoystickAxes.LEFTVERTICAL.value]   = self.__rov_movements[GUIControllerMovementActions.FORWARD]
+            self.__axis_action_mapping[JoystickAxes.LEFTHORIZONTAL.value] = self.__rov_movements[GUIControllerMovementActions.LATERAL]
+
     # ── Private helpers ───────────────────────────────────────────────────────
 
     def __map_value(self, value, from_low, from_high, to_low, to_high):
         return round(((value - from_low) * (to_high - to_low) / (from_high - from_low) + to_low), 2)
 
     def __press_event(self, method):
-        method()
-        # Only send PCB state for actions that actually involve the PCB,
-        # and only when the PCB is connected — a socket error here would
-        # crash the entire joystick thread.
+        try:
+            method()
+        except Exception as e:
+            print(f"[Joystick] press_event error: {e}")
         if method in self.__pcb_actions and self.pcb.connected:
             try:
                 self.pcb.send_state()
@@ -206,7 +216,7 @@ class Joystick(QThread):
                 if "Xbox 360 Controller" not in self.__controller_name:
                     print("please plug in only a single xbox 360 controller.")
                     self.__controller.quit()
-                    pygame.time.Clock.tick(10)
+                    pygame.time.Clock().tick(1)
                     continue
                 self.__controller_buttons_count = self.__controller.get_numbuttons()
                 self.__controller_axes_count = self.__controller.get_numaxes()
@@ -236,7 +246,7 @@ class Joystick(QThread):
                 # Read hat
                 self.__controller_hat_data = self.__controller.get_hat(0)
 
-                # ── Button press/release ──────────────────────────────────────
+                # ── Button press ──────────────────────────────────────────────
                 for i in range(self.__controller_buttons_count):
                     if self.__controller_buttons_data[i] == 1 and self.__controller_last_buttons_data[i] == 0:
                         action = self.__button_action_mapping[i]
@@ -244,7 +254,6 @@ class Joystick(QThread):
                             self.__press_event(action)
                         else:
                             print("mapping is none")
-                    # release branch intentionally left for future use
 
                 # ── Hat press/release ─────────────────────────────────────────
 
@@ -296,7 +305,7 @@ class Joystick(QThread):
                     self.__controller_mapped_axes_data[4] += int(-400 * self.__controller_raw_axes_data[4] + 400 * self.__controller_raw_axes_data[5])
 
                 # ── Send movement values ──────────────────────────────────────
-                for i in range(4):
+                for i in range(5):
                     action = self.__axis_action_mapping[i]
                     if action != "":
                         self.__axis_event(action, self.__controller_mapped_axes_data[i])
