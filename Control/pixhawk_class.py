@@ -74,6 +74,8 @@ class Pixhawk(QThread):
         self.__rov_flip_value = 1
         self.sent_armed = False
         self.sent_mode = ""
+        self.__rov_flip_lateral = 1
+        self.__rov_flip_forward = 1
 
     def get_gain(self): return self.__gain
 
@@ -113,13 +115,13 @@ class Pixhawk(QThread):
         self.__throttle_value += int(value * (self.__gain / 100))
 
     def set_yaw_value(self, value):
-        self.__yaw_value += int(value * self.__rov_flip_value * (self.__gain / 100))
+        self.__yaw_value += int(value * (self.__gain / 100))
 
     def set_forward_value(self, value):
-        self.__forward_value += int(value * self.__rov_flip_value * (self.__gain / 100))
+        self.__forward_value += int(value * self.__rov_flip_forward * (self.__gain / 100))
 
     def set_lateral_value(self, value):
-        self.__lateral_value += int(value * self.__rov_flip_value * (self.__gain / 100))
+        self.__lateral_value += int(value * self.__rov_flip_lateral * (self.__gain / 100))
 
     def __check_and_correct_movement_values(self):
         limit = lambda v: max(
@@ -167,7 +169,8 @@ class Pixhawk(QThread):
             mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
             mode_id)
 
-    def control_flip_rov(self): self.__rov_flip_value *= -1
+    def control_flip_rov_forward(self): self.__rov_flip_forward *= -1
+    def control_flip_rov_lateral(self): self.__rov_flip_lateral *= -1
 
     def run(self):
         self.__running = True
