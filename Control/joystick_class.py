@@ -316,7 +316,7 @@ class Joystick(QThread):
                 # ── Send movement values ──────────────────────────────────────
                 for i in range(5):
                     action = self.__axis_action_mapping[i]
-                    if action != "":
+                    if not self.pixhawk.disarm_procedure and self.pixhawk.armed and action != "":
                         self.__axis_event(action, self.__controller_mapped_axes_data[i])
 
                 self.pixhawk.move_rov()
@@ -329,7 +329,7 @@ class Joystick(QThread):
                 self.__controller_raw_axes_data.clear()
                 self.__controller_mapped_axes_data = [0, 0, 0, 0, 0]
 
-                pygame.time.Clock().tick(200)
+                pygame.time.Clock().tick(50)
 
     def stop(self):
         if self.__controller_connected:
