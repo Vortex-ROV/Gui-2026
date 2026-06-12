@@ -84,7 +84,13 @@ class Pixhawk(QThread):
     
         self.__change_up = 5
         self.__change_down = 50
+        self.__positive_roll = False
+        self.__positive_throttle = False
+        self.__positive_yaw = False
+        self.__positive_forward = False
+        self.__positive_lateral = False
         self.disarm_procedure = False
+        
 
     def get_gain(self): return self.__gain
 
@@ -119,7 +125,7 @@ class Pixhawk(QThread):
 
     def set_roll_value(self, value):
         self.__roll_value += int(value * (self.__gain / 100))
-
+        
     def set_throttle_value(self, value):
         self.__throttle_value += int(value * (self.__gain / 100))
 
@@ -242,7 +248,18 @@ class Pixhawk(QThread):
     def move_rov(self):
         if self.armed and self.__connected:
             self.__check_and_correct_movement_values()
-            if self.__roll_value > 1500:
+            if self.__roll_value > 1550: self.__positive_roll = True
+            elif self.__roll_value < 1450: self.__positive_roll = False
+            if self.__throttle_value > 1550: self.__positive_throttle = True
+            elif self.__throttle_value < 1450: self.__positive_throttle = False
+            if self.__yaw_value > 1550: self.__positive_yaw = True
+            elif self.__yaw_value < 1450: self.__positive_yaw = False
+            if self.__forward_value > 1550: self.__positive_forward = True
+            elif self.__forward_value < 1450: self.__positive_forward = False
+            if self.__lateral_value > 1550: self.__positive_lateral = True
+            elif self.__lateral_value < 1450: self.__positive_lateral = False
+
+            if self.__roll_value > 1500 and self.__positive_roll:
                 if self.__roll_value > self.__current_roll_value:
                     self.__current_roll_value = min(self.__current_roll_value + self.__change_up, self.__roll_value)
                 elif self.__roll_value < self.__current_roll_value:
@@ -253,7 +270,7 @@ class Pixhawk(QThread):
                 elif self.__roll_value < self.__current_roll_value:
                     self.__current_roll_value = max(self.__current_roll_value - self.__change_up, self.__roll_value)
 
-            if self.__throttle_value > 1500:
+            if self.__throttle_value > 1500 and self.__positive_throttle:
                 if self.__throttle_value > self.__current_throttle_value:
                     self.__current_throttle_value = min(self.__current_throttle_value + self.__change_up, self.__throttle_value)
                 elif self.__throttle_value < self.__current_throttle_value:
@@ -264,7 +281,7 @@ class Pixhawk(QThread):
                 elif self.__throttle_value < self.__current_throttle_value:
                     self.__current_throttle_value = max(self.__current_throttle_value - self.__change_up, self.__throttle_value)
 
-            if self.__yaw_value > 1500:
+            if self.__yaw_value > 1500 and self.__positive_yaw:
                 if self.__yaw_value > self.__current_yaw_value:
                     self.__current_yaw_value = min(self.__current_yaw_value + self.__change_up, self.__yaw_value)
                 elif self.__yaw_value < self.__current_yaw_value:
@@ -275,7 +292,7 @@ class Pixhawk(QThread):
                 elif self.__yaw_value < self.__current_yaw_value:
                     self.__current_yaw_value = max(self.__current_yaw_value - self.__change_up, self.__yaw_value)
 
-            if self.__forward_value > 1500:
+            if self.__forward_value > 1500 and self.__positive_forward:
                 if self.__forward_value > self.__current_forward_value:
                     self.__current_forward_value = min(self.__current_forward_value + self.__change_up, self.__forward_value)
                 elif self.__forward_value < self.__current_forward_value:
@@ -286,7 +303,7 @@ class Pixhawk(QThread):
                 elif self.__forward_value < self.__current_forward_value:
                     self.__current_forward_value = max(self.__current_forward_value - self.__change_up, self.__forward_value)
 
-            if self.__lateral_value > 1500:
+            if self.__lateral_value > 1500 and self.__positive_lateral:
                 if self.__lateral_value > self.__current_lateral_value:
                     self.__current_lateral_value = min(self.__current_lateral_value + self.__change_up, self.__lateral_value)
                 elif self.__lateral_value < self.__current_lateral_value:
@@ -304,6 +321,7 @@ class Pixhawk(QThread):
                              int(self.__current_forward_value), 
                              int(self.__current_lateral_value), 
                              65535, 65535, 65535]
+            print(int(time.time()), rc_channel_values[1:5])
             self.__pixhawk.mav.rc_channels_override_send(
                 self.__pixhawk.target_system,
                 self.__pixhawk.target_component,
